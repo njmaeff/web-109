@@ -1,0 +1,44 @@
+version: "3.7"
+
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+
+    # you don't need ports mapped for this to work
+    # but if you want to connect for troubleshooting and stuff you can map a port to the host
+    #    ports:
+    #      - "3306:3306"
+
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WORDPRESS_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  wordpress:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: .docker/wp/Dockerfile
+
+    restart: always
+    volumes:
+      #      you could map custom plugins and themes like so.
+      - ./wp_content/plugins/custom:/var/www/html/wp_content/plugins/custom
+      - ./wp_content/themes/custom:/var/www/html/wp_content/themes/custom
+      - ./apache/.htaccess:/var/www/html/.htaccess
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DATABASE}
+
+volumes:
+  db_data: { }

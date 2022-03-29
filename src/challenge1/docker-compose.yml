@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+
+  apache-ssh:
+
+    build:
+      context: .
+      dockerfile: .docker/apache/Dockerfile
+
+    command:
+      - ${SSH_KEY}
+      
+    volumes:
+      - ./www:/var/www
+
+    ports:
+      - '8080:80'
+      - '2222:22'
+
+    init: true
